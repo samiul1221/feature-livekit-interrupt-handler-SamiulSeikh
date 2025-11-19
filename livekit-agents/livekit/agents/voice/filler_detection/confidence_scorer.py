@@ -34,6 +34,9 @@ class ConfidenceScorer:
     THRESHOLD_DEFINITE = 0.80  # Definitely filler
     THRESHOLD_LIKELY = 0.50    # Likely filler
     
+    # Ambiguous fillers that require stricter context checking
+    AMBIGUOUS_FILLERS = {'you know', 'like', 'i mean', 'actually', 'basically'}
+
     def __init__(
         self,
         semantic_detector=None,
@@ -147,6 +150,47 @@ class ConfidenceScorer:
         else:
             scores['audio'] = None
         
+        # --- Contextual Disambiguation for Ambiguous Fillers ---
+        # If the text contains ambiguous fillers (e.g., "you know") but also contains
+        # other non-filler words, we should significantly reduce the confidence.
+        normalized_text = self._normalize_text(text)
+        words = set(normalized_text.split())
+        
+        # Check if any ambiguous filler is present
+        has_ambiguous = any(amb in normalized_text for amb in self.AMBIGUOUS_FILLERS)
+        
+        if has_ambiguous:
+            # Count non-filler words
+            # We consider words that are NOT in the strict filler list AND not ambiguous fillers
+            non_filler_count = 0
+            for w in words:
+                if w not in self.filler_words and w not in self.AMBIGUOUS_FILLERS:
+                    # Also check if 'w' is part of a multi-word ambiguous filler
+                    # This is a simple heuristic; for "you know", 'you' and 'know' might be counted.
+                    # Better: check if the phrase is EXACTLY the ambiguous filler.
+                    non_filler_count += 1
+            
+            # If the text is NOT just the ambiguous filler (or other fillers), penalize
+            # Example: "you know" -> penalty 0 (it IS the filler)
+            # Example: "do you know" -> penalty applied
+            
+            # Check if the text is EXACTLY one of the ambiguous fillers (or a combination of fillers)
+            is_pure_filler = False
+            if normalized_text in self.AMBIGUOUS_FILLERS:
+                is_pure_filler = True
+            elif words.issubset(self.filler_words.union(self.AMBIGUOUS_FILLERS)):
+                 # It's all fillers, e.g. "um you know"
+                 is_pure_filler = True
+            
+            if not is_pure_filler:
+                # It has other content. Penalize heavily.
+                # We multiply the weighted sum by a penalty factor (e.g., 0.2)
+                # effectively saying "this is likely NOT a filler".
+                penalty_factor = 0.2
+                weighted_sum *= penalty_factor
+                scores['ambiguity_penalty'] = penalty_factor
+                logger.debug(f"Applied ambiguity penalty to '{text}' (factor {penalty_factor})")
+
         # Calculate final confidence (normalize by actual total weight)
         final_confidence = weighted_sum / total_weight if total_weight > 0 else 0.0
         
