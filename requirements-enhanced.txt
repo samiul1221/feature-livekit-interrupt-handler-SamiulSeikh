@@ -1,0 +1,19 @@
+# Enhanced requirements for the multi-layered filler detection system
+# Install with: pip install -r requirements-enhanced.txt
+
+# Core ML & embedding dependencies
+sentence-transformers>=2.2.2
+torch>=2.0.0
+numpy>=1.24.0
+
+# Optional audio features (required for librosa-based analysis)
+librosa>=0.10.0
+scipy>=1.10.0
+soundfile>=0.12.0
+
+# Optional: tensorflow compatibility wrapper for Keras 3
+tf-keras
+
+# Optional: the core project and plugins (recommended for running examples)
+# pip install -e livekit-agents
+# pip install livekit-plugins-deepgram livekit-plugins-openai livekit-plugins-cartesia livekit-plugins-silero
