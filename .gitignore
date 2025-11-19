@@ -177,3 +177,21 @@ docs/
 
 # Examples for development
 examples/dev/*
+
+# ----------------------------------------------------------------------------
+# Caches for ML models and embeddings
+# ----------------------------------------------------------------------------
+# Sentence transformers / HuggingFace caches
+.cache/huggingface
+.cache/huggingface/transformers
+.cache/torch
+.cache/sentence_transformers
+sentence_transformers_cache/
+# Local model files
+*.pt
+*.bin
+model/
+models/
+
+# Ignore .env files under examples subfolders to avoid committing real secrets
+examples/**/.env

@@ -1,4 +1,4 @@
-from . import io, run_result
+from . import io, run_result, filler_detection
 from .agent import Agent, AgentTask, ModelSettings
 from .agent_session import AgentSession, VoiceActivityVideoSampler
 from .events import (
@@ -16,6 +16,7 @@ from .events import (
     UserInputTranscribedEvent,
     UserStateChangedEvent,
 )
+from .filler_filter import FillerFilterPlugin
 from .room_io import (
     _ParticipantAudioOutput,
     _ParticipantStreamTranscriptionOutput,
@@ -44,10 +45,12 @@ __all__ = [
     "AgentStateChangedEvent",
     "FunctionToolsExecutedEvent",
     "AgentFalseInterruptionEvent",
+    "FillerFilterPlugin",
     "TranscriptSynchronizer",
     "io",
     "room_io",
     "run_result",
+    "filler_detection",
     "_ParticipantAudioOutput",
     "_ParticipantTranscriptionOutput",
     "_ParticipantStreamTranscriptionOutput",
